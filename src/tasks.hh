@@ -11,6 +11,9 @@ namespace EMC {
 int assemble(bool forceOverwrite, std::string input, std::string output,
 		std::vector<double> inputBinCenters, matrixType matType, int countRate);
 
+int rebin(bool forceOverwrite, std::string input, std::string output,
+		int countRate);
+
 } /* namespace EMC */
 
 #endif /* EMC_tasks_hh_included */

@@ -135,6 +135,12 @@ int main(int argc, char* argv[]) {
 		cout << "finished with status " << retVal << endl;
 		break;
 	}
+	case REBIN: {
+		cout << "rebinning matrix" << endl;
+		int retVal = rebin(forceOverwrite, input, output, countRate);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
 	case tNONE:
     default:
         cout << "" << endl << endl;
@@ -147,9 +153,6 @@ int main(int argc, char* argv[]) {
         cout << "      input file name" << endl;
         cout << "   -o <filename>" << endl;
         cout << "      output file name" << endl << endl;
-        cout << "   In case of input or output being a matrix, the filenames are the basename." << endl;
-        cout << "   The program expects to find and write '.val', '.err' and '.bin'" << endl;
-        cout << "   with the values, the errors and the bin center respectively." << endl;
         cout << "   In case of a vector the columns are expected to be bin center, value, value error" << endl;
         cout << "   with space character for spacing" << endl;
         cout << " arguments for specific tasks:" << endl;
@@ -166,12 +169,8 @@ int main(int argc, char* argv[]) {
         cout << "     -c <integer>" << endl;
         cout << "        total events, count rate for normalization" << endl;
         cout << "   rebin: rebins a matrix by merging bins in order to increase statistical significance" << endl;
-        cout << "     -b I <bin0>,<bin1>,..." << endl;
-        cout << "        list of input bin separators (floating point possible). Bin center will be placed in between." << endl;
-        cout << "     -b O <bin0>,<bin1>,..." << endl;
-        cout << "        list of output bin separators (floating point possible). Bin center will be placed in between." << endl;
-        cout << "     -L" << endl;
-        cout << "        Use logarithmic bin center" << endl;
+        cout << "     -c <integer>" << endl;
+        cout << "        dimension of output square matrix" << endl;
         /*cout << "   unbinned_spectrum_assemble: assemble a matrix from unbinned spectrum data" << endl;
         cout << "     -i <filename format string>" << endl;
         cout << "        input file name. String that will be formatted using sprintf with data passed by -b" << endl;

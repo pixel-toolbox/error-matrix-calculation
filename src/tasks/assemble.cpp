@@ -77,11 +77,8 @@ int EMC::assemble(bool forceOverwrite, std::string input, std::string output,
 		columnCount++;
     }
 
-    thisMatrix.print();
-
     if (matType == mtProbability) {
     	thisMatrix = thisMatrix.makeProbability(countRate);
-        thisMatrix.print();
     }
 
     std::ofstream outputF(output);

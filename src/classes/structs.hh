@@ -8,7 +8,7 @@
 namespace EMC {
 
 enum matrixType {
-	mtNumber, mtProbability, mtDensity
+	mtNone, mtNumber, mtProbability, mtDensity
 };
 
 typedef long double real;

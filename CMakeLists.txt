@@ -49,6 +49,7 @@ set(HEADERS
 set(SOURCES
     ${PROJECT_SOURCE_DIR}/src/main.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/assemble.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/rebin.cpp
     ${PROJECT_SOURCE_DIR}/src/classes/BinnedTypedMatrix.cpp
 )
 

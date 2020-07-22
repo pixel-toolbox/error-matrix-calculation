@@ -22,11 +22,11 @@ struct BinnedTypedMatrix {
 	}
 
 	matrixType matType;
-	std::vector<double> rowIndex;
-	std::vector<double> columnIndex;
+	std::vector<double> rowIndex; // in case of density these are borders
+	std::vector<double> columnIndex; // in case of density these are borders
 	boost::numeric::ublas::matrix<ValueError> m;
 
-	static BinnedTypedMatrix readFromFile(std::ifstream inFile);
+	static BinnedTypedMatrix readFromFile(std::ifstream& inFile);
 	BinnedTypedMatrix makeProbability(int countRate);
 	void print();
 

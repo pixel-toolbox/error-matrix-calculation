@@ -1,4 +1,7 @@
 #include "BinnedTypedMatrix.hh"
+#include "../util/split.hh"
+
+#include <iostream>
 
 namespace EMC {
 
@@ -14,8 +17,70 @@ std::map<matrixType, std::string> invertedMatrixTypeMap = {
     { mtDensity, "density"}
 };
 
-BinnedTypedMatrix BinnedTypedMatrix::readFromFile(std::ifstream inFile) {
-	return BinnedTypedMatrix(std::vector<double>(), std::vector<double>(), mtNumber);
+BinnedTypedMatrix BinnedTypedMatrix::readFromFile(std::ifstream& inFile) {
+	matrixType matType = mtNone;
+	std::vector<double> rowIndex; // in case of density these are borders
+	std::vector<double> columnIndex; // in case of density these are borders
+
+	while (!inFile.eof()) {
+		std::string line;
+		std::getline(inFile, line);
+		auto splitLine = split(line, ' ');
+		try {
+			std::string keyword = splitLine[0];
+			if (keyword == "type") {
+				matType = matrixTypeMap.at(splitLine[1]);
+			} else if (keyword == "rowIndex") {
+				for (unsigned int i = 1; i < splitLine.size(); i++) {
+					rowIndex.push_back(std::stod(splitLine[i]));
+				}
+			} else if (keyword == "columnIndex") {
+				for (unsigned int i = 1; i < splitLine.size(); i++) {
+					columnIndex.push_back(std::stod(splitLine[i]));
+				}
+			}
+		} catch (...) {
+			std::cout << "error at line: " << line << std::endl;
+		}
+		if (matType != mtNone && rowIndex.size() > 0
+				&& columnIndex.size() > 0) {
+			break;
+		}
+	}
+
+	BinnedTypedMatrix retMat(rowIndex, columnIndex, matType);
+
+	while (!inFile.eof()) {
+		std::string line;
+		std::getline(inFile, line);
+		if (line != "") {
+			try {
+				if (line == "value") {
+					for (unsigned int i=0; i<rowIndex.size(); i++) {
+						std::getline(inFile, line);
+						auto splitLine = split(line, ' ');
+						for (unsigned int j=0; j<columnIndex.size(); j++) {
+							retMat.m(i, j).value = std::stod(splitLine[j]);
+						}
+					}
+				} else if (line == "error") {
+					for (unsigned int i=0; i<rowIndex.size(); i++) {
+						std::getline(inFile, line);
+						auto splitLine = split(line, ' ');
+						for (unsigned int j=0; j<columnIndex.size(); j++) {
+							retMat.m(i, j).err_sq = pow(std::stod(splitLine[j]), 2);
+						}
+					}
+				} else {
+					std::cout << "error in BinnedTypedMatrix::readFromFile while reading mat values" << std::endl;
+				}
+			} catch (...) {
+				std::cout << "error at line: " << line << std::endl;
+			}
+		}
+	}
+
+	return retMat;
 }
 
 BinnedTypedMatrix BinnedTypedMatrix::makeProbability(int countRate) {
