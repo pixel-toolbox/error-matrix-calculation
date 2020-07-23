@@ -50,24 +50,34 @@ BinnedTypedMatrix BinnedTypedMatrix::readFromFile(std::ifstream& inFile) {
 
 	BinnedTypedMatrix retMat(rowIndex, columnIndex, matType);
 
+	unsigned int columnCount;
+	unsigned int rowCount;
+	if (matType == mtDensity) {
+		columnCount = columnIndex.size() - 1;
+		rowCount = rowIndex.size() - 1;
+	} else {
+		columnCount = columnIndex.size();
+		rowCount = rowIndex.size();
+	}
+
 	while (!inFile.eof()) {
 		std::string line;
 		std::getline(inFile, line);
 		if (line != "") {
 			try {
 				if (line == "value") {
-					for (unsigned int i=0; i<rowIndex.size(); i++) {
+					for (unsigned int i=0; i<rowCount; i++) {
 						std::getline(inFile, line);
 						auto splitLine = split(line, ' ');
-						for (unsigned int j=0; j<columnIndex.size(); j++) {
+						for (unsigned int j=0; j<columnCount; j++) {
 							retMat.m(i, j).value = std::stod(splitLine[j]);
 						}
 					}
 				} else if (line == "error") {
-					for (unsigned int i=0; i<rowIndex.size(); i++) {
+					for (unsigned int i=0; i<rowCount; i++) {
 						std::getline(inFile, line);
 						auto splitLine = split(line, ' ');
-						for (unsigned int j=0; j<columnIndex.size(); j++) {
+						for (unsigned int j=0; j<columnCount; j++) {
 							retMat.m(i, j).err_sq = pow(std::stod(splitLine[j]), 2);
 						}
 					}
@@ -90,8 +100,8 @@ BinnedTypedMatrix BinnedTypedMatrix::makeProbability(int countRate) {
 	}
 	BinnedTypedMatrix retMat(rowIndex, columnIndex, mtProbability);
 
-	for (unsigned int i = 0; i<rowIndex.size(); i++) {
-		for (unsigned int j = 0; j<columnIndex.size(); j++) {
+	for (unsigned int i = 0; i<rowCount; i++) {
+		for (unsigned int j = 0; j<columnCount; j++) {
 			retMat.m(i, j) = m(i, j) / countRate;
 		}
 	}
@@ -100,8 +110,8 @@ BinnedTypedMatrix BinnedTypedMatrix::makeProbability(int countRate) {
 }
 
 void BinnedTypedMatrix::print() {
-	for (unsigned int i = 0; i<rowIndex.size(); i++) {
-		for (unsigned int j = 0; j<columnIndex.size(); j++) {
+	for (unsigned int i = 0; i<rowCount; i++) {
+		for (unsigned int j = 0; j<columnCount; j++) {
 			std::cout << "thisMatrix.m(" << i << ", " << j << ") = (" << m(i, j).value << ", " << sqrt(m(i, j).err_sq) << ")" << std::endl;
 		}
 	}
@@ -124,16 +134,16 @@ void BinnedTypedMatrix::writeToFile(std::ofstream& outFile) {
 	outFile << std::endl;
 
 	outFile << "value" << std::endl;
-	for (unsigned int i = 0; i<rowIndex.size(); i++) {
-		for (unsigned int j = 0; j<columnIndex.size(); j++) {
+	for (unsigned int i = 0; i<rowCount; i++) {
+		for (unsigned int j = 0; j<columnCount; j++) {
 			outFile << m(i, j).value << " ";
 		}
 		outFile << std::endl;
 	}
 
 	outFile << "error" << std::endl;
-	for (unsigned int i = 0; i<rowIndex.size(); i++) {
-		for (unsigned int j = 0; j<columnIndex.size(); j++) {
+	for (unsigned int i = 0; i<rowCount; i++) {
+		for (unsigned int j = 0; j<columnCount; j++) {
 			outFile << sqrt(m(i, j).err_sq) << " ";
 		}
 		outFile << std::endl;

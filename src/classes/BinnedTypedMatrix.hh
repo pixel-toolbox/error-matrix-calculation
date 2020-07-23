@@ -16,12 +16,18 @@ extern std::map<std::string, matrixType> matrixTypeMap;
 struct BinnedTypedMatrix {
 	inline BinnedTypedMatrix(std::vector<double> rowIndex,
 			std::vector<double> columnIndex, matrixType matType) :
-			matType(matType), rowIndex(rowIndex), columnIndex(columnIndex), m(
-					rowIndex.size(), columnIndex.size()) {
-		std::cout << "creating BinnedTypedMatrix with " << rowIndex.size() << "x" << columnIndex.size() << std::endl;
+			matType(matType),
+			rowCount(matType == mtDensity ?
+				rowIndex.size() - 1 : rowIndex.size()),
+			columnCount(matType == mtDensity ?
+				columnIndex.size() - 1 : columnIndex.size()),
+			rowIndex(rowIndex), columnIndex(columnIndex), m(rowCount, columnCount) {
+		std::cout << "creating BinnedTypedMatrix with " << mtDensity << "x" << columnCount << std::endl;
 	}
 
 	matrixType matType;
+	unsigned int rowCount;
+	unsigned int columnCount;
 	std::vector<double> rowIndex; // in case of density these are borders
 	std::vector<double> columnIndex; // in case of density these are borders
 	boost::numeric::ublas::matrix<ValueError> m;
