@@ -25,6 +25,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O2 ")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra -pedantic")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wmissing-prototypes")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wstrict-prototypes")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wfatal-errors")
 
 # add compiler flags to define C++ version
 # and to compile position independent code
@@ -50,6 +51,10 @@ set(SOURCES
     ${PROJECT_SOURCE_DIR}/src/main.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/assemble.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/rebin.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/invert.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/triangulate.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/print_stats.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/apply.cpp
     ${PROJECT_SOURCE_DIR}/src/classes/BinnedTypedMatrix.cpp
 )
 

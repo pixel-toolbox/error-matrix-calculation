@@ -1,5 +1,5 @@
-#ifndef SRC_CLASSES_BINNEDTYPEDMATRIX_HH_
-#define SRC_CLASSES_BINNEDTYPEDMATRIX_HH_
+#ifndef CLASSES_BINNEDTYPEDMATRIX_HH_
+#define CLASSES_BINNEDTYPEDMATRIX_HH_
 
 #include "structs.hh"
 
@@ -22,7 +22,7 @@ struct BinnedTypedMatrix {
 			columnCount(matType == mtDensity ?
 				columnIndex.size() - 1 : columnIndex.size()),
 			rowIndex(rowIndex), columnIndex(columnIndex), m(rowCount, columnCount) {
-		std::cout << "creating BinnedTypedMatrix with " << mtDensity << "x" << columnCount << std::endl;
+		std::cout << "creating BinnedTypedMatrix with " << rowCount << "x" << columnCount << std::endl;
 	}
 
 	matrixType matType;
@@ -41,4 +41,4 @@ struct BinnedTypedMatrix {
 
 } /* namespace EMC */
 
-#endif /* SRC_CLASSES_BINNEDTYPEDMATRIX_HH_ */
+#endif /* CLASSES_BINNEDTYPEDMATRIX_HH_ */

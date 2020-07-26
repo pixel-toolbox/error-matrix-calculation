@@ -61,39 +61,55 @@ struct ValueError {
 		return ValueError(value / other, err_sq / (other * other));
 	}
 
-	inline void operator+=(const ValueError& other) {
+	inline ValueError operator+=(const ValueError& other) {
 		err_sq += other.err_sq;
 		value += other.value;
+		return ValueError(value, err_sq);
 	}
-	inline void operator-=(const ValueError& other) {
+	inline ValueError operator-=(const ValueError& other) {
 		err_sq += other.err_sq;
 		value -= other.value;
+		return ValueError(value, err_sq);
 	}
-	inline void operator*=(const ValueError& other) {
+	inline ValueError operator*=(const ValueError& other) {
 		err_sq = value * value * other.err_sq
 				+ other.value * other.value * err_sq;
 		value *= other.value;
+		return ValueError(value, err_sq);
 	}
-	inline void operator/=(const ValueError& other) {
+	inline ValueError operator/=(const ValueError& other) {
 		err_sq = (other.err_sq
 				+ (value * value / (other.value * other.value)) * err_sq)
 				/ (other.value * other.value);
 		value /= other.value;
+		return ValueError(value, err_sq);
 	}
 
-	inline void operator+=(real other) {
+	inline ValueError operator+=(real other) {
 		value += other;
+		return ValueError(value, err_sq);
 	}
-	inline void operator-=(real other) {
+	inline ValueError operator-=(real other) {
 		value += other;
+		return ValueError(value, err_sq);
 	}
-	inline void operator*=(real other) {
+	inline ValueError operator*=(real other) {
 		err_sq *= other * other;
 		value *= other;
+		return ValueError(value, err_sq);
 	}
-	inline void operator/=(real other) {
+	inline ValueError operator/=(real other) {
 		err_sq /= other * other;
 		value /= value;
+		return ValueError(value, err_sq);
+	}
+
+	inline bool operator<(const ValueError& other) {
+		return value > other.value;
+	}
+
+	inline bool operator>(const ValueError& other) {
+		return value > other.value;
 	}
 };
 
@@ -108,6 +124,10 @@ inline ValueError operator*(real a, const ValueError& b) {
 }
 inline ValueError operator/(real a, const ValueError& b) {
 	return ValueError(a / b.value, (b.err_sq / (b.value * b.value)) / (a * a));
+}
+
+inline ValueError abs(const ValueError& b) {
+	return ValueError(std::abs(b.value), b.err_sq);
 }
 
 } /* namespace EMC */

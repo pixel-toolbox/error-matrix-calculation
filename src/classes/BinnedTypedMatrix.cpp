@@ -2,6 +2,7 @@
 #include "../util/split.hh"
 
 #include <iostream>
+#include <iomanip>
 
 namespace EMC {
 
@@ -136,7 +137,7 @@ void BinnedTypedMatrix::writeToFile(std::ofstream& outFile) {
 	outFile << "value" << std::endl;
 	for (unsigned int i = 0; i<rowCount; i++) {
 		for (unsigned int j = 0; j<columnCount; j++) {
-			outFile << m(i, j).value << " ";
+			outFile << std::setw(12) << m(i, j).value << " ";
 		}
 		outFile << std::endl;
 	}
@@ -144,7 +145,7 @@ void BinnedTypedMatrix::writeToFile(std::ofstream& outFile) {
 	outFile << "error" << std::endl;
 	for (unsigned int i = 0; i<rowCount; i++) {
 		for (unsigned int j = 0; j<columnCount; j++) {
-			outFile << sqrt(m(i, j).err_sq) << " ";
+			outFile << std::setw(12) << sqrt(m(i, j).err_sq) << " ";
 		}
 		outFile << std::endl;
 	}

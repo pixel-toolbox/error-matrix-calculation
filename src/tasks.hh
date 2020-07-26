@@ -12,7 +12,16 @@ int assemble(bool forceOverwrite, std::string input, std::string output,
 		std::vector<double> inputBinCenters, matrixType matType, int countRate);
 
 int rebin(bool forceOverwrite, std::string input, std::string output,
-		int countRate);
+		int countRate, double minRow, double minCol, double minRowBin,
+		double minColBin, double maxRow, double maxCol);
+
+int invert(bool forceOverwrite, std::string input, std::string output);
+
+//int triangulate(bool forceOverwrite, std::string input, std::string output);
+
+int print_stats(std::string matrixFileName);
+
+int apply(bool forceOverwrite, std::string inputVectorFile, std::string outputVectorFile, std::string matrixFileName);
 
 } /* namespace EMC */
 

@@ -21,19 +21,19 @@ enum task {
     tNONE = 0,
     ASSEMBLE,
 	REBIN,
-    UNBINNED_SPECTRUM_ASSEMBLE,
-    UNBINNED_ASSEMBLE,
     INVERT,
+    TRIANGULATE,
+    PRINT_STATS,
 	APPLY
 };
 
 map<string, task> taskNameMap = {
     { "assemble", ASSEMBLE },
     { "rebin", REBIN },
-    /*{ "unbinned_spectrum_assemble", UNBINNED_SPECTRUM_ASSEMBLE },
-    { "unbinned_assemble", UNBINNED_ASSEMBLE },
     { "invert", INVERT},
-    { "apply", APPLY }*/
+    { "triangulate", TRIANGULATE},
+    { "print_stats", PRINT_STATS},
+    { "apply", APPLY }
 };
 
 } /* namespace EMC */
@@ -49,9 +49,18 @@ int main(int argc, char* argv[]) {
     string output;
     string input;
 
+    string matrixFileName;
+
     std::vector<double> inputBinCenters;
     matrixType matType = mtNumber;
     int countRate = -1;
+
+    double minRow = -1;
+    double minCol = -1;
+    double minRowBin = -1;
+    double minColBin = -1;
+    double maxRow = -1;
+    double maxCol = -1;
 
     bool fail = false;
 
@@ -99,6 +108,17 @@ int main(int argc, char* argv[]) {
 				}
 			}
 				break;
+			case 'm': {
+				argPos++;
+				auto maxStrVec = split(argv[argPos], ',');
+				minRow = std::stod(maxStrVec[0]);
+				minCol = std::stod(maxStrVec[1]);
+				minRowBin = std::stod(maxStrVec[2]);
+				minColBin = std::stod(maxStrVec[3]);
+				maxRow = std::stod(maxStrVec[4]);
+				maxCol = std::stod(maxStrVec[5]);
+			}
+				break;
 			case 'T':
 				argPos++;
 				if (matrixTypeMap.find(argv[argPos]) == matrixTypeMap.end()) {
@@ -111,6 +131,10 @@ int main(int argc, char* argv[]) {
 			case 'c':
 				argPos++;
 				countRate = std::stoi(argv[argPos]);
+				break;
+			case 'M':
+				argPos++;
+				matrixFileName = argv[argPos];
 				break;
 			default:
 				cout << "unexpected flag in argument number " << argPos << endl;
@@ -137,7 +161,32 @@ int main(int argc, char* argv[]) {
 	}
 	case REBIN: {
 		cout << "rebinning matrix" << endl;
-		int retVal = rebin(forceOverwrite, input, output, countRate);
+		int retVal = rebin(forceOverwrite, input, output, countRate, minRow,
+				minCol, minRowBin, minColBin, maxRow, maxCol);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
+	case INVERT: {
+		cout << "inverting matrix" << endl;
+		int retVal = invert(forceOverwrite, input, output);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
+	/*case TRIANGULATE: {
+		cout << "triangulating matrix" << endl;
+		int retVal = triangulate(forceOverwrite, input, output);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}*/
+	case PRINT_STATS: {
+		cout << "printing matrix stats matrix" << endl;
+		int retVal = print_stats(matrixFileName);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
+	case APPLY: {
+		cout << "applying matrix" << endl;
+		int retVal = apply(forceOverwrite, input, output, matrixFileName);
 		cout << "finished with status " << retVal << endl;
 		break;
 	}
@@ -171,30 +220,19 @@ int main(int argc, char* argv[]) {
         cout << "   rebin: rebins a matrix by merging bins in order to increase statistical significance" << endl;
         cout << "     -c <integer>" << endl;
         cout << "        dimension of output square matrix" << endl;
-        /*cout << "   unbinned_spectrum_assemble: assemble a matrix from unbinned spectrum data" << endl;
-        cout << "     -i <filename format string>" << endl;
-        cout << "        input file name. String that will be formatted using sprintf with data passed by -b" << endl;
-        cout << "        expects an energy in each line" << endl;
-        cout << "     -b <bin0>,<bin1>,..." << endl;
-        cout << "        list of input bin centers (floating point possible). Passed to -i via sprintf" << endl;
-        cout << "     -b O <bin0>,<bin1>,..." << endl;
-        cout << "        list of output bin separators (floating point possible). Bin center will be placed in between." << endl;
-        cout << "     -L" << endl;
-        cout << "        Use logarithmic bin center" << endl;
-        cout << "     -c <integer>" << endl;
-        cout << "        total events, count rate for normalization" << endl;
-        cout << "   unbinned_assemble: assemble a matrix from completely unbinned data" << endl;
-        cout << "     -i <filename>" << endl;
-        cout << "        input file name." << endl;
-        cout << "        expects '<input energy> <output energy>' in each line" << endl;
-        cout << "     -b I <bin0>,<bin1>,..." << endl;
-        cout << "        list of input bin separators (floating point possible). Bin center will be placed in between." << endl;
-        cout << "     -b O <bin0>,<bin1>,..." << endl;
-        cout << "        list of output bin separators (floating point possible). Bin center will be placed in between." << endl;
-        cout << "     -L" << endl;
-        cout << "        Use logarithmic bin center" << endl;
-        cout << "     -c <integer>" << endl;
-        cout << "        total events, count rate for normalization" << endl;*/
+        cout << "     -m <minRow><minCol><minRowBin><minColBin><maxRow><maxCol>" << endl;
+        cout << "        row and column bin parameters" << endl;
+        cout << "   invert: inverts a matrix" << endl;
+        cout << "   print_stats: inverts a matrix" << endl;
+        cout << "     -M <filename>" << endl;
+        cout << "        filename of the matriy" << endl;
+        cout << "   apply: inverts a matrix; input and output are spectrum files" << endl;
+        cout << "        first column is expected to be bin center and second the counts in that bin" << endl;
+        cout << "        vector will be rebinned and rescaled to matrix dimensions" << endl;
+        cout << "        output is bin center and count rate" << endl;
+        cout << "     -M <filename>" << endl;
+        cout << "        filename of the matriy" << endl;
+        //cout << "   triangulate: triangulate a matrix by deleting off-diagonal values" << endl;
         cout << endl;
     }
 
