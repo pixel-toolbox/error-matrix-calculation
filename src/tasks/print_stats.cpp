@@ -17,8 +17,15 @@ int EMC::print_stats(std::string matrixFileName) {
 
 	std::cout << "oscillationSum:" << std::endl;
 	double oscillationSum = 0;
-	for (unsigned int i=0; i < responseMatrix.rowCount-2; i++) {
-		oscillationSum += std::fabs(responseMatrix.m(i, responseMatrix.columnCount-1).value - responseMatrix.m(i+1, responseMatrix.columnCount-1).value);
+	for (unsigned int j=2; j < responseMatrix.columnCount; j++) {
+		for (unsigned int i=0; i < j-1; i++) {
+			oscillationSum += std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value);
+		}
+	}
+	for (unsigned int j=0; j < responseMatrix.columnCount-2; j++) {
+		for (unsigned int i=j+1; i < responseMatrix.rowCount-1; i++) {
+			oscillationSum += std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value);
+		}
 	}
 	std::cout << oscillationSum << std::endl;
 
