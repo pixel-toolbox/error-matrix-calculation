@@ -55,6 +55,7 @@ set(SOURCES
     ${PROJECT_SOURCE_DIR}/src/tasks/triangulate.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/print_stats.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/apply.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/fit_values.cpp
     ${PROJECT_SOURCE_DIR}/src/classes/BinnedTypedMatrix.cpp
 )
 

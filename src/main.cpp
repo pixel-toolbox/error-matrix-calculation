@@ -24,7 +24,8 @@ enum task {
     INVERT,
     TRIANGULATE,
     PRINT_STATS,
-	APPLY
+	APPLY,
+	FIT_VALUES
 };
 
 map<string, task> taskNameMap = {
@@ -33,7 +34,8 @@ map<string, task> taskNameMap = {
     { "invert", INVERT},
     { "triangulate", TRIANGULATE},
     { "print_stats", PRINT_STATS},
-    { "apply", APPLY }
+    { "apply", APPLY },
+    { "fit_values", FIT_VALUES }
 };
 
 } /* namespace EMC */
@@ -190,6 +192,13 @@ int main(int argc, char* argv[]) {
 		cout << "finished with status " << retVal << endl;
 		break;
 	}
+	case FIT_VALUES: {
+		cout << "fitting matrix parameters" << endl;
+		int retVal = fit_values(input, output, countRate, minRow,
+				minCol, minRowBin, minColBin, maxRow, maxCol);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
 	case tNONE:
     default:
         cout << "" << endl << endl;
@@ -232,6 +241,13 @@ int main(int argc, char* argv[]) {
         cout << "        output is bin center and count rate" << endl;
         cout << "     -M <filename>" << endl;
         cout << "        filename of the matriy" << endl;
+        cout << "   fit_values: optimizes rebinning based on inverted matrix error metric" << endl;
+        cout << "               output is the base filename for the rebinned (.rebin.mat) and inverted (.rebin.inverted.mat) matrix" << endl;
+        cout << "               these matrices will be overwritten multiple times!" << endl;
+        cout << "     -c <integer>" << endl;
+        cout << "        dimension of output square matrix" << endl;
+        cout << "     -m <minRow><minCol><minRowBin><minColBin><maxRow><maxCol>" << endl;
+        cout << "        initial row and column bin parameters; minCol and maxCol will stay constant" << endl;
         //cout << "   triangulate: triangulate a matrix by deleting off-diagonal values" << endl;
         cout << endl;
     }
