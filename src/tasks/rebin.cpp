@@ -19,7 +19,8 @@ struct Mapping {
 	const double a;
 
 	Mapping(int count, double min, double minBinSize, double max) :
-		min(min), max(max), minBinSize(minBinSize), a(2.0*((max-min)-minBinSize*count)/(count*count)) {}
+		min(min), max(max), minBinSize(minBinSize),
+		a(2.0*((max-min)-minBinSize*count)/(count*count)) {}
 
 	double valueToBinPosition(double value) {
 		if (value <= min) {

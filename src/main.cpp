@@ -22,7 +22,10 @@ enum task {
     ASSEMBLE,
 	REBIN,
     INVERT,
-    TRIANGULATE,
+	REBIN_INVERT,
+	DE_PILEUP,
+    SUBTRACT,
+	MULTIPLY_RESPONSE_CURVE,
     PRINT_STATS,
 	APPLY,
 	FIT_VALUES
@@ -32,7 +35,10 @@ map<string, task> taskNameMap = {
     { "assemble", ASSEMBLE },
     { "rebin", REBIN },
     { "invert", INVERT},
-    { "triangulate", TRIANGULATE},
+    { "rebin_invert", REBIN_INVERT},
+    { "de_pileup", DE_PILEUP},
+    { "subtract", SUBTRACT},
+    { "multiply_resp_curve", MULTIPLY_RESPONSE_CURVE},
     { "print_stats", PRINT_STATS},
     { "apply", APPLY },
     { "fit_values", FIT_VALUES }
@@ -63,6 +69,11 @@ int main(int argc, char* argv[]) {
     double minColBin = -1;
     double maxRow = -1;
     double maxCol = -1;
+
+    float rowErrorEst = -1;
+    float colErrorEst = -1;
+
+    double lowerBound = 0;
 
     bool fail = false;
 
@@ -134,10 +145,21 @@ int main(int argc, char* argv[]) {
 				argPos++;
 				countRate = std::stoi(argv[argPos]);
 				break;
+			case 'l':
+				argPos++;
+				lowerBound = std::stof(argv[argPos]);
+				break;
 			case 'M':
 				argPos++;
 				matrixFileName = argv[argPos];
 				break;
+			case 'd': {
+				argPos++;
+				auto strVec = split(argv[argPos], ',');
+				rowErrorEst = std::stod(strVec[0]);
+				colErrorEst = std::stod(strVec[1]);
+				break;
+			}
 			default:
 				cout << "unexpected flag in argument number " << argPos << endl;
 				fail = true;
@@ -174,12 +196,31 @@ int main(int argc, char* argv[]) {
 		cout << "finished with status " << retVal << endl;
 		break;
 	}
-	/*case TRIANGULATE: {
-		cout << "triangulating matrix" << endl;
-		int retVal = triangulate(forceOverwrite, input, output);
+	case REBIN_INVERT: {
+		cout << "rebinning and inverting matrix" << endl;
+		int retVal = rebin_invert(forceOverwrite, input, output, countRate, minRow,
+				minCol, minRowBin, minColBin, maxRow, maxCol, rowErrorEst, colErrorEst);
 		cout << "finished with status " << retVal << endl;
 		break;
-	}*/
+	}
+	case DE_PILEUP: {
+		cout << "reversing pileup" << endl;
+		int retVal = de_pileup(forceOverwrite, input, output, countRate, lowerBound);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
+	case SUBTRACT: {
+		cout << "subtracting matrix" << endl;
+		int retVal = subtract(forceOverwrite, input, output, matrixFileName);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
+	case MULTIPLY_RESPONSE_CURVE: {
+		cout << "multiply-response-curving matrix" << endl;
+		int retVal = multiply_resp_curve(forceOverwrite, input, output, matrixFileName);
+		cout << "finished with status " << retVal << endl;
+		break;
+	}
 	case PRINT_STATS: {
 		cout << "printing matrix stats matrix" << endl;
 		int retVal = print_stats(matrixFileName);
@@ -203,7 +244,7 @@ int main(int argc, char* argv[]) {
     default:
         cout << "" << endl << endl;
         cout << " supported general arguments:" << endl;
-        cout << "   -t [ assemble | invert | apply ]" << endl;
+        cout << "   -t [ de_pileup | assemble | rebin | invert | rebin_invert | apply | print_stats | fit_values ]" << endl;
         cout << "      specifies what task is being executed" << endl;
         cout << "      should be specified first" << endl;
         cout << "   -f overwrite output files / directories, deletes target files before writing" << endl;
@@ -214,6 +255,11 @@ int main(int argc, char* argv[]) {
         cout << "   In case of a vector the columns are expected to be bin center, value, value error" << endl;
         cout << "   with space character for spacing" << endl;
         cout << " arguments for specific tasks:" << endl;
+        cout << "   de_pileup: reconstructs pileup numerically" << endl;
+        cout << "     -c <integer>" << endl;
+        cout << "        total pixel count" << endl;
+        cout << "     -l <float>" << endl;
+        cout << "        up to this energy counts are set to 0" << endl;
         cout << "   assemble: assembles a matrix based on putting spectrums into columns, output bins determined by input spectrum" << endl;
         cout << "     -i <filename format string>" << endl;
         cout << "        input file name. String that will be formatted using sprintf with data passed by -b" << endl;
@@ -230,8 +276,24 @@ int main(int argc, char* argv[]) {
         cout << "     -c <integer>" << endl;
         cout << "        dimension of output square matrix" << endl;
         cout << "     -m <minRow><minCol><minRowBin><minColBin><maxRow><maxCol>" << endl;
-        cout << "        row and column bin parameters" << endl;
+        cout << "        row and column bin parameters, float" << endl;
+        cout << "   rebin_invert: rebins a matrix and inverts it. Estimates errors as well." << endl;
+        cout << "     -c <integer>" << endl;
+        cout << "        dimension of output square matrix" << endl;
+        cout << "     -m <minRow><minCol><minRowBin><minColBin><maxRow><maxCol>" << endl;
+        cout << "        row and column bin parameters, float" << endl;
+        cout << "     -d <row Error, float>,<column Error, float>" << endl;
+        cout << "        estimate error based on row and column error." << endl;
         cout << "   invert: inverts a matrix" << endl;
+        cout << "   subtract: subtracts spectra" << endl;
+        cout << "        uses <filelane>.cntr and <filelane>.step for input, output and filename of subtracted spectrum." << endl;
+        cout << "     -M <filename>" << endl;
+        cout << "        filename of the spectrum that will be subtracted" << endl;
+        cout << "   multiply_resp_curve: scales spectrum with response curve" << endl;
+        cout << "        uses <filelane>.cntr and <filelane>.step for input and output" << endl;
+        cout << "     -M <filename>" << endl;
+        cout << "        filename of the transmission curve" << endl;
+        cout << "        this is assumed to be more dense than the input spectrum" << endl;
         cout << "   print_stats: inverts a matrix" << endl;
         cout << "     -M <filename>" << endl;
         cout << "        filename of the matriy" << endl;
@@ -240,7 +302,7 @@ int main(int argc, char* argv[]) {
         cout << "        vector will be rebinned and rescaled to matrix dimensions" << endl;
         cout << "        output is bin center and count rate" << endl;
         cout << "     -M <filename>" << endl;
-        cout << "        filename of the matriy" << endl;
+        cout << "        filename of the matrix" << endl;
         cout << "   fit_values: optimizes rebinning based on inverted matrix error metric" << endl;
         cout << "               output is the base filename for the rebinned (.rebin.mat) and inverted (.rebin.inverted.mat) matrix" << endl;
         cout << "               these matrices will be overwritten multiple times!" << endl;
@@ -248,22 +310,8 @@ int main(int argc, char* argv[]) {
         cout << "        dimension of output square matrix" << endl;
         cout << "     -m <minRow><minCol><minRowBin><minColBin><maxRow><maxCol>" << endl;
         cout << "        initial row and column bin parameters; minCol and maxCol will stay constant" << endl;
-        //cout << "   triangulate: triangulate a matrix by deleting off-diagonal values" << endl;
         cout << endl;
     }
-
-    /*ublas::vector<ValueError> v1(200);
-
-    ublas::matrix<ValueError> m1 = ublas::identity_matrix<ValueError>(200);
-
-    for (int i=0; i<200; i++) {
-    	v1[i] = ValueError(i, sqrt(i));
-    	m1(i, i) = ValueError(200-i, 42);
-    }
-
-    for (ValueError ve : ublas::prod(m1, v1)) {
-    	cout << ve.value << " " << ve.err_sq << std::endl;
-    }*/
 
     return 0;
 }

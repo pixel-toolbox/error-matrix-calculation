@@ -56,6 +56,10 @@ set(SOURCES
     ${PROJECT_SOURCE_DIR}/src/tasks/print_stats.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/apply.cpp
     ${PROJECT_SOURCE_DIR}/src/tasks/fit_values.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/rebin_invert.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/de_pileup.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/subtract.cpp
+    ${PROJECT_SOURCE_DIR}/src/tasks/multiply_resp_curve.cpp
     ${PROJECT_SOURCE_DIR}/src/classes/BinnedTypedMatrix.cpp
 )
 

@@ -5,9 +5,6 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
-/*#include <boost/numeric/ublas/vector_proxy.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/lu.hpp>*/
 
 #include "../tasks.hh"
 #include "../util/split.hh"
@@ -58,11 +55,15 @@ int EMC::apply(bool forceOverwrite, std::string inputVectorFileName, std::string
 			fillPosition++;
 		}
 
-		std::cout << inputBinCenter[i] << " --> [" << responseMatrix.columnIndex.at(fillPosition) << ", " << responseMatrix.columnIndex.at(fillPosition + 1) << "]" << std::endl;
+		//std::cout << inputBinCenter[i] << " --> [" << responseMatrix.columnIndex.at(fillPosition) << ", " << responseMatrix.columnIndex.at(fillPosition + 1) << "]" << std::endl;
 
 		if (fillPosition >= 0) {
 			inputVector[fillPosition].value += inputBinValue[i];
-			inputVectorBinWidth[fillPosition] += 1; //// TODO: change this to measured bin width at correct position
+			if (i == 0) {
+				inputVectorBinWidth[fillPosition] += inputBinCenter[i+1] - inputBinCenter[i];
+			} else {
+				inputVectorBinWidth[fillPosition] += inputBinCenter[i] - inputBinCenter[i-1];
+			}
 		}
 	}
 
@@ -73,28 +74,24 @@ int EMC::apply(bool forceOverwrite, std::string inputVectorFileName, std::string
 		std::cout << "inputVectorBinWidth[i] = " << inputVectorBinWidth[i] << std::endl;
 	}
 
-	for (auto val : inputVector) {
-		std::cout << "  (" << val.value << ", " << sqrt(val.err_sq) << ")" << std::endl;
-	}
-
 	ublas::vector<ValueError> outputVector = ublas::prod(responseMatrix.m, inputVector);
 
-	for (unsigned int i=0; i<responseMatrix.rowCount; i++) {
-		std::cout << responseMatrix.rowIndex[i]   << " " << outputVector[i].value << std::endl;
-		std::cout << responseMatrix.rowIndex[i+1] << " " << outputVector[i].value << std::endl;
+    std::ofstream outputFstep(outputVectorFileName + ".step");
+
+    for (unsigned int i=0; i<responseMatrix.rowCount; i++) {
+    	outputFstep << responseMatrix.rowIndex[i]   << " " << outputVector[i].value << std::endl;
+    	outputFstep << responseMatrix.rowIndex[i+1] << " " << outputVector[i].value << std::endl;
 	}
+
+    outputFstep.close();
+
+    std::ofstream outputFcntr(outputVectorFileName + ".cntr");
+
+    for (unsigned int i=0; i<responseMatrix.rowCount; i++) {
+    	outputFcntr << (0.5*(responseMatrix.rowIndex[i] + responseMatrix.rowIndex[i+1]))   << " " << outputVector[i].value << " " << sqrt(outputVector[i].err_sq) << std::endl;
+	}
+
+    outputFcntr.close();
 
     return 0;
 }
-
-
-    /*ublas::vector<ValueError> v1(200);
-
-    ublas::matrix<ValueError> m1 = ublas::identity_matrix<ValueError>(200);
-
-    for (int i=0; i<200; i++) {
-    	v1[i] = ValueError(i, sqrt(i));
-    	m1(i, i) = ValueError(200-i, 42);
-    }
-
-    for (ValueError ve : ublas::prod(m1, v1)) {*/

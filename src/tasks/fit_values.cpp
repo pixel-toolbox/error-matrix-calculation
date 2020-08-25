@@ -32,13 +32,17 @@ double getOscillationSumForParameter(std::string input, std::string output,
 
 	for (unsigned int j=0; j < responseMatrix.columnCount-2; j++) {
 		for (unsigned int i=0; i < responseMatrix.rowCount-1; i++) {
-			oscillationSumNaive += std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value);
+			//oscillationSumNaive += std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value);
+			//oscillationSumNaive += std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value) / (std::fabs(responseMatrix.m(i, j).value) + std::fabs(responseMatrix.m(i+1, j).value));
+			oscillationSumNaive += pow(std::fabs(responseMatrix.m(i, j).value - responseMatrix.m(i+1, j).value), 2);
 		}
 	}
 
 	for (unsigned int i=0; i < responseMatrix.columnCount-2; i++) {
 		for (unsigned int j=0; j < responseMatrix.rowCount-1; j++) {
-			oscillationSumNaive += std::fabs(responseMatrix.m(j, i).value - responseMatrix.m(j, i+1).value);
+			//oscillationSumNaive += std::fabs(responseMatrix.m(j, i).value - responseMatrix.m(j, i+1).value);
+			//oscillationSumNaive += std::fabs(responseMatrix.m(j, i).value - responseMatrix.m(j, i+1).value) / (std::fabs(responseMatrix.m(j, i).value) + std::fabs(responseMatrix.m(j, i+1).value));
+			oscillationSumNaive += pow(std::fabs(responseMatrix.m(j, i).value - responseMatrix.m(j, i+1).value), 2);
 		}
 	}
 
@@ -91,22 +95,20 @@ int EMC::fit_values(std::string input, std::string output,
 	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin  , minColBin  , maxRow-1, maxCol) < err_sum) {
 	    	finished = false;
 	    	maxRow--;
-	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin+.1, minColBin  , maxRow, maxCol  ) < err_sum) {
+	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin+.5, minColBin  , maxRow, maxCol  ) < err_sum) {
 	    	finished = false;
-	    	minRowBin+=.1;
-	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin-.1, minColBin  , maxRow, maxCol  ) < err_sum) {
+	    	minRowBin+=.5;
+	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin-.5, minColBin  , maxRow, maxCol  ) < err_sum) {
 	    	finished = false;
-	    	minRowBin-=.1;
-	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin  , minColBin+.1, maxRow, maxCol  ) < err_sum) {
+	    	minRowBin-=.5;
+	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin  , minColBin+.25, maxRow, maxCol  ) < err_sum) {
 	    	finished = false;
-	    	minColBin+=.1;
-	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin  , minColBin-.1, maxRow, maxCol  ) < err_sum) {
+	    	minColBin+=.25;
+	    } else if (getOscillationSumForParameter(input, output, count, minRow  , minCol  , minRowBin  , minColBin-.25, maxRow, maxCol  ) < err_sum) {
 	    	finished = false;
-	    	minColBin-=.1;
+	    	minColBin-=.25;
 	    }
 	}
-
-
 
     return 0;
 }
